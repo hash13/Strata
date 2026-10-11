@@ -376,6 +376,16 @@ class Telemetry:
             "threads": os.cpu_count(),
             "psutil": self.ps is not None,
         }
+        if self._energy_enabled:
+            # Optional electricity price in major currency units per kWh.
+            try:
+                price = float(electricity.get("price_per_kwh"))
+                if not 0 <= price < float("inf"):
+                    price = None
+            except (TypeError, ValueError):
+                price = None
+            self.static["electricity_price_per_kwh"] = price
+            self.static["electricity_currency"] = str(electricity.get("currency") or "EUR").upper()
         self._disk_prev = None
         self._stop = threading.Event()
         threading.Thread(target=self._loop, daemon=True).start()
